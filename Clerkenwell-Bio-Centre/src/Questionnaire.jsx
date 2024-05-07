@@ -10,7 +10,7 @@ const RenderQuestion = ({
   setUserName,
   error,
   selectedConditions,
-  handleConditionChange,
+  handleChangeCondition,
   email,
   setEmail,
   handleOtherConditionChange,
@@ -37,7 +37,7 @@ const RenderQuestion = ({
     case 1:
       return (
         <div>
-          <p className="text-black ft" >What's your name?</p>
+          <p className="text-black ft">What's your name?</p>
           <Form.Control
             type="text"
             placeholder="Enter your name"
@@ -53,15 +53,36 @@ const RenderQuestion = ({
           <p className="text-black ft">
             Do you have any of the following? Please click on all that apply.
           </p>
-          <Select
+          {/* <Select
             isMulti
             name="Condition"
             options={conditionsData}
             classNamePrefix="select"
             styles={customStyles}
             value={selectedConditions}
-            onChange={handleConditionChange}
-          />
+            onChange={handleChangeCondition}
+          /> */}
+          {conditionsData.map((condition, index) => (
+            <label
+              key={index}
+              className="question-checkbox"
+              htmlFor={condition.value}>
+              <input
+                type="checkbox"
+                name={condition.value}
+                id={condition.value}
+                onChange={() => {
+                  handleChangeCondition(condition);
+                }}
+              />
+              <p className="mb-0">{condition.label}</p>
+              <div className="question-checkbox-check">
+                {selectedConditions.includes(condition) && (
+                  <div className="question-checkbox-checked"></div>
+                )}
+              </div>
+            </label>
+          ))}
           {selectedConditions.some(
             (condition) => condition.value === "Other"
           ) && (
@@ -81,10 +102,10 @@ const RenderQuestion = ({
     case 3:
       return (
         <div>
-          <p className="text-white ft">
+          <p className="text-black ft">
             Please choose all trials you would be able to attend.
           </p>
-          <Select
+          {/* <Select
             isMulti
             name="TrialOption"
             options={theatreDates}
@@ -92,7 +113,28 @@ const RenderQuestion = ({
             styles={customStyles}
             value={selectedTrialOptions}
             onChange={handleTrialOptionChange}
-          />
+          /> */}
+          {theatreDates.map((option, index) => (
+            <label
+              key={index}
+              className="question-checkbox"
+              htmlFor={option.value}>
+              <input
+                type="checkbox"
+                name={option.value}
+                id={option.value}
+                onChange={() => {
+                  handleTrialOptionChange(option);
+                }}
+              />
+              <p className="mb-0">{option.label}</p>
+              <div className="question-checkbox-check">
+                {selectedTrialOptions.includes(option) && (
+                  <div className="question-checkbox-checked"></div>
+                )}
+              </div>
+            </label>
+          ))}
           {error && <p className="text-danger mt-2">{error}</p>}
         </div>
       );
@@ -112,16 +154,19 @@ const RenderQuestion = ({
     default:
       return (
         <div>
-          <p className="text-black ft">
+          {/* <p className="text-black ft">
             Thank you for submitting your application!
+          </p> */}
+          <p className="text-black ft">
+            Thank you for your submission. Our doctors will now assess your
+            application. <br /> Expect an email in the next 3 days.
           </p>
-          <button
+          {/* <button
             className="animated-button mt-4 mb-5 mt-3"
-            onClick={handleBack}
-          >
+            onClick={handleBack}>
             <span>Go Back</span>
             <span></span>
-          </button>
+          </button> */}
         </div>
       );
   }
@@ -138,15 +183,18 @@ const Questionnaire = () => {
   const handleSubmit = () => {
     // Data to be sent in the request body
 
-    const conditionsValues = selectedConditions.map(condition => condition.value);
-    const trialOptionsValues = selectedTrialOptions.map(option => option.value);
+    const conditionsValues = selectedConditions.map(
+      (condition) => condition.value
+    );
+    const trialOptionsValues = selectedTrialOptions.map(
+      (option) => option.value
+    );
     const data = {
       userName,
       conditionsValues,
       trialOptionsValues,
       email,
     };
-
 
     // Endpoint to which the POST request will be sent
     const url = `${import.meta.env.VITE_BACKEND_URL}/send-email`; // Replace with your actual endpoint
@@ -216,12 +264,46 @@ const Questionnaire = () => {
     setError("");
   };
 
-  const handleConditionChange = (selectedOptions) => {
-    setSelectedConditions(selectedOptions);
+  const handleChangeCondition = (selectedOptions) => {
+    const optionExists = selectedConditions.some(
+      (option) => option.value === selectedOptions.value
+    );
+
+    if (optionExists) {
+      // If the option already exists, remove it
+      setSelectedConditions((prevSelectedConditions) =>
+        prevSelectedConditions.filter(
+          (option) => option.value !== selectedOptions.value
+        )
+      );
+    } else {
+      // If the option doesn't exist, add it
+      setSelectedConditions((prevSelectedConditions) => [
+        ...prevSelectedConditions,
+        selectedOptions,
+      ]);
+    }
   };
 
   const handleTrialOptionChange = (selectedOptions) => {
-    setSelectedTrialOptions(selectedOptions);
+    const optionExists = selectedConditions.some(
+      (option) => option.value === selectedOptions.value
+    );
+
+    if (optionExists) {
+      // If the option already exists, remove it
+      setSelectedTrialOptions((prevSelectedConditions) =>
+        prevSelectedConditions.filter(
+          (option) => option.value !== selectedOptions.value
+        )
+      );
+    } else {
+      // If the option doesn't exist, add it
+      setSelectedTrialOptions((prevSelectedConditions) => [
+        ...prevSelectedConditions,
+        selectedOptions,
+      ]);
+    }
   };
 
   const handleOtherConditionChange = (e) => {
@@ -232,6 +314,10 @@ const Questionnaire = () => {
       );
       return [...filteredOptions, otherConditionOption];
     });
+  };
+
+  const handleBack = () => {
+    setCurrentQuestion((prev) => prev - 1);
   };
 
   const isValidEmail = (email) => {
@@ -249,18 +335,25 @@ const Questionnaire = () => {
           setUserName={setUserName}
           error={error}
           selectedConditions={selectedConditions}
-          handleConditionChange={handleConditionChange}
+          handleChangeCondition={handleChangeCondition}
           email={email}
           setEmail={setEmail}
           handleOtherConditionChange={handleOtherConditionChange}
           handleTrialOptionChange={handleTrialOptionChange}
           selectedTrialOptions={selectedTrialOptions}
         />
+        {currentQuestion > 1 && (
+          <button
+            className="animated-button mt-4 mb-5 mt-3 ps-0"
+            onClick={handleBack}>
+            <span className="text-black">Back</span>
+            <span></span>
+          </button>
+        )}
         {currentQuestion !== 5 && (
           <button
-            className="animated-button mt-4 mb-5 mt-3"
-            onClick={handleNextQuestion}
-          >
+            className="animated-button mt-4 mb-5 mt-3 ps-0"
+            onClick={handleNextQuestion}>
             <span className="text-black">Next</span>
             <span></span>
           </button>

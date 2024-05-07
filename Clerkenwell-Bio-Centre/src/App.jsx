@@ -8,6 +8,7 @@ import Home from "./Home";
 import CodeGenerate from "./CodeGenerate";
 import Questionnaire from "./Questionnaire";
 import Ticket from "./Ticket";
+import PaymentVerification from "./PaymentVerification";
 
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/code-generate" element={<CodeGenerate />} />
         <Route path="/questionnaire" element={<Questionnaire />} />
-        <Route path="/ticket/:id" element={<Ticket />} />
+        <Route path="/tickets/:id" element={<Ticket />} />
+        <Route path="/payments" element={<PaymentVerification />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

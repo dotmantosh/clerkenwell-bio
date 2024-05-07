@@ -1,17 +1,35 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Alert,
+  ListGroupItem,
+} from "react-bootstrap";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import ConfirmAttendance from "./ConfirmAttendance";
+import ThankYou from "./ThankYou";
 
 const Ticket = () => {
   const [code, setCode] = useState("");
   const [isCodeValid, setIsCodeValid] = useState(false);
-  const [isFree, setIsFree] = useState(false);
-  const [booked, setBooked] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [booked, setBooked] = useState(false);
+  const [isFree, setIsFree] = useState(false);
   const [showDate, setShowDate] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
   const [userData, setUserData] = useState(null);
+  const [isConfirmingCode, setIsConfirmingCode] = useState(false);
+  const [isLoadingStripe, setIsLoadingStripe] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
+  const searchParams = new URLSearchParams(location.search);
+  const paymentStatus = searchParams.get("payment_status");
+
   if (!id) {
     navigate("/");
   }
@@ -22,12 +40,17 @@ const Ticket = () => {
   const handleCodeConfirmation = async () => {
     try {
       // Validate code length
-      if (code.length !== 6) {
-        alert("Please enter a valid 6-digit code.");
+      if (isConfirmingCode) {
+        return;
+      }
+      if (code.length < 6) {
+        alert("Please enter a valid code.");
         return;
       }
       const url = `${import.meta.env.VITE_BACKEND_URL}/validate-code`;
+      console.log(`${import.meta.env.VITE_BACKEND_URL}`);
       // Make the POST request to the backend API
+      setIsConfirmingCode(true);
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -38,11 +61,11 @@ const Ticket = () => {
           code: code,
         }),
       });
-
+      console.log("response: ", response);
       // Check if request was successful
       if (response.ok) {
         const data = await response.json();
-
+        console.log("data: ", data);
         // Check if userData exists and expiryDateTime is valid
         if (data.userData && data.userData.expiryDateTime) {
           const expiryDateTime = new Date(data.userData.expiryDateTime);
@@ -50,6 +73,7 @@ const Ticket = () => {
 
           // Check if expiryDateTime is after currentDateTime
           if (expiryDateTime > currentDateTime) {
+            data.userData.id = id;
             setUserData(data.userData);
             // Handle valid expiration
             setIsCodeValid(true);
@@ -75,11 +99,67 @@ const Ticket = () => {
       // Handle fetch error
       console.error("Error:", error);
       alert("An error occurred. Please try again.");
+    } finally {
+      setIsConfirmingCode(false);
     }
   };
 
-  const handlePayment = () => {
-    window.location.href = "STRIPE_PAYMENT_URL";
+  const handlePayment = async () => {
+    const backendUrl = `${
+      import.meta.env.VITE_BACKEND_URL
+    }/create-checkout-session`;
+
+    let priceId;
+
+    // Determine priceId based on userData.price
+    if (userData.price.toString() === "£10") {
+      priceId = `${import.meta.env.VITE_TICKET_10}`;
+    } else if (userData.price.toString() === "£40") {
+      priceId = `${import.meta.env.VITE_TICKET_40}`;
+    }
+
+    const items = [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ];
+
+    // console.log(items);
+    try {
+      if (isLoadingStripe) {
+        return;
+      }
+      setIsLoadingStripe(true);
+      const response = await fetch(backendUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ items, userData }),
+      });
+
+      const data = await response.json();
+      const sessionId = data.sessionId;
+
+      // Use Stripe.js to redirect to checkout page
+      const stripe = await loadStripe(
+        `${import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}`
+      );
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: sessionId,
+      });
+
+      if (error) {
+        console.error("Error redirecting to checkout:", error);
+        // Handle error
+      }
+    } catch (error) {
+      console.error("Error making payment:", error);
+      // Handle error
+    } finally {
+      setIsLoadingStripe(false);
+    }
   };
 
   const handleConfirmBooking = () => {
@@ -98,37 +178,52 @@ const Ticket = () => {
     };
     return date.toLocaleDateString("en-US", options);
   };
-
+  useEffect(() => {
+    if (paymentStatus === "true") {
+      setIsCodeValid(true);
+      setIsConfirmed(true);
+      setBooked(true);
+    }
+  }, []);
   return (
     <div className="app-background">
-      <Container className="mt-5">
+      <Container className="">
         {!isCodeValid && (
-          <Row>
-            <Col md={{ span: 6, offset: 3 }}>
-              <h2 className="text-center text-white mb-4">Enter Code</h2>
+          <Row className="d-flex justify-content-center align-items-center enter-code-row">
+            <Col md={{ span: 6 }}>
+              {/* <h2 className="text-center text-black mb-4">Enter Code</h2> */}
               <Form>
                 <Form.Group controlId="formCode">
                   <Form.Control
                     type="text"
-                    placeholder="Enter 6-digit code"
+                    placeholder="Welcome to VEGETABLES: Please enter your unique code"
                     value={code}
                     onChange={handleInputChange}
                     className="mb-3"
                   />
                 </Form.Group>
                 <button
-                  className="animated-button mt-4"
+                  className="animated-button text-black mt-4"
                   type="button"
-                  onClick={handleCodeConfirmation}
-                >
-                  <span>Confirm Code</span>
+                  disabled={isConfirmingCode}
+                  onClick={handleCodeConfirmation}>
+                  <span>{isConfirmingCode ? "Loading ..." : "Confirm"}</span>
                   <span></span>
                 </button>
               </Form>
             </Col>
           </Row>
         )}
-        {isConfirmed && (
+        {isCodeValid && isConfirmed && !booked ? (
+          <ConfirmAttendance
+            isFree={isFree}
+            userData={userData}
+            handlePayment={handlePayment}
+          />
+        ) : (
+          <ThankYou />
+        )}
+        {/* {isConfirmed && (
           <Row className="mt-5">
             <Col md={{ span: 6, offset: 3 }}>
               <Alert variant="success">
@@ -143,7 +238,7 @@ const Ticket = () => {
                     </p>
                     <b>
                       <p className="mb-4">
-                        {showDate && `Date: ${userData.selectedSlot}`}
+                        {showDate && `Date: ${userData?.selectedSlot}`}
                       </p>
                     </b>
                     <p className="pb-3">
@@ -154,14 +249,13 @@ const Ticket = () => {
                       <>
                         <button
                           onClick={handleConfirmBooking}
-                          className="btn btn-success"
-                        >
+                          className="btn btn-success">
                           Confirm Booking
                         </button>
                       </>
                     ) : (
                       <>
-                        <p>The amount you owe : {`${userData.price}`}</p>
+                        <p>The amount you owe : {`${userData?.price}`}</p>
                         <Button variant="success" onClick={handlePayment}>
                           Confirm Booking
                         </Button>
@@ -179,7 +273,7 @@ const Ticket = () => {
               </Alert>
             </Col>
           </Row>
-        )}
+        )} */}
       </Container>
     </div>
   );

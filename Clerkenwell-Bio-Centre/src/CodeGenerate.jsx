@@ -88,7 +88,7 @@ function CodeGenerate() {
       },
       body: JSON.stringify(data), // Convert data to JSON string
     };
-
+    // console.log(url);
     // Make the POST request
     fetch(url, options)
       .then((response) => {
@@ -140,8 +140,7 @@ function CodeGenerate() {
               ].map((option, index) => (
                 <Dropdown.Item
                   key={index}
-                  onClick={() => handleTrialOptionChange(option)}
-                >
+                  onClick={() => handleTrialOptionChange(option)}>
                   {option}
                 </Dropdown.Item>
               ))}
@@ -155,8 +154,7 @@ function CodeGenerate() {
               {["free", "£10", "£40"].map((option, index) => (
                 <Dropdown.Item
                   key={index}
-                  onClick={() => handlePriceOptionChange(option)}
-                >
+                  onClick={() => handlePriceOptionChange(option)}>
                   {option}
                 </Dropdown.Item>
               ))}
@@ -185,9 +183,9 @@ function CodeGenerate() {
               type="text"
               value={code}
               onChange={handleCodeChange}
-              className="input text-white"
+              className="input text-black"
             />
-            <span className="bar text-white"></span>
+            <span className="bar text-black"></span>
             <label className="label">
               <span className="label-char" style={{ "--index": 0 }}>
                 C
@@ -207,10 +205,9 @@ function CodeGenerate() {
           {error && <p className="text-danger mt-4">{error}</p>}
 
           <button
-            className="animated-button mt-4"
+            className="animated-button text-black mt-4 ps-0"
             type="button"
-            onClick={generateRandomCode}
-          >
+            onClick={generateRandomCode}>
             <span>Generate Code</span>
             <span></span>
           </button>

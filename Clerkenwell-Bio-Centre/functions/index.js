@@ -7,6 +7,8 @@ const nodemailer = require("nodemailer");
 const admin = require("firebase-admin");
 const ClientTemplate = require("./ClientTemplate");
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 dotenv.config();
 admin.initializeApp();
 
@@ -15,7 +17,7 @@ app.use(cors);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (request, response) => {
+app.get("/test", (request, response) => {
   return response.status(200).json({ msg: "hello World" });
 });
 
@@ -131,6 +133,53 @@ app.post("/validate-code", async (req, res) => {
     console.error("Error:", error);
     // Send an error response
     res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/create-checkout-session", async (req, res) => {
+  const { items, userData } = req.body;
+  // console.log(req.body);
+  try {
+    const session = await stripe.checkout.sessions.create({
+      line_items: items,
+      mode: "payment",
+      success_url: `http://localhost:5173/payments?userId=${userData.id}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `http://localhost:5173/payments?userId=${userData.id}`,
+    });
+
+    res.send(JSON.stringify({ sessionId: session.id }));
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: "Could not process stripe payment" });
+  }
+});
+
+app.post("/verify-payment", async (req, res) => {
+  const { sessionId, userId } = req.body;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // console.log(session);
+    const paymentDetails = {
+      amount: session.amount_total,
+      currency: session.currency,
+      sessionId: session.id,
+      paymentStatus: session.payment_status === "paid",
+      userId, // Assuming you pass userId in the query string
+      // Add more payment details as needed
+    };
+
+    const docRef = await admin
+      .firestore()
+      .collection("payments")
+      .add(paymentDetails);
+
+    paymentDetails.paymentId = docRef.id;
+
+    res.json(paymentDetails);
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    res.status(500).json({ error: "Error fetching payment details" });
   }
 });
 

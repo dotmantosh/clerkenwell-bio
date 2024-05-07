@@ -1,22 +1,38 @@
 /* Add this CSS to your existing styles or create a new CSS file */
 .video-container {
-    position: relative;
-    overflow: hidden;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    margin-top: 20px; /* Adjust as needed */
-  }
-  
+  /* position: relative; */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding-bottom: 70px;
+  margin-top: 40px; /* Adjust as needed */
+}
+
+.video {
+  /* position: absolute;
+  bottom: 0;
+  left: 50%; */
+  width: 85%;
+  height: 540px;
+  transform: translate(-50%, 150%);
+  transition: transform 1s ease;
+}
+
+.video iframe {
+  margin: 0 auto;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.video.show {
+  transform: translateY(0);
+}
+
+@media screen and (max-width: 767px) {
   .video {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transform: translateY(100%);
-    transition: transform 1s ease;
+    height: 330px;
   }
-  
-  .video.show {
-    transform: translateY(0);
-  }
+}

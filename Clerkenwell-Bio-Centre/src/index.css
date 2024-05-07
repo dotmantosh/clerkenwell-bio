@@ -1,5 +1,6 @@
- :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+:root {
+  /* font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; */
+  font-family: "Courier Prime", monospace;
   line-height: 1.5;
   font-weight: 400;
 
@@ -14,9 +15,24 @@
   -webkit-text-size-adjust: 100%;
 }
 
-*{
+html {
+  width: 100%;
+  overflow-x: hidden;
+}
+* {
   margin: 0;
   padding: 0;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+}
+
+@media screen and (max-width: 767px) {
+  html {
+    font-size: 50%;
+  }
 }
 
 /*a {
