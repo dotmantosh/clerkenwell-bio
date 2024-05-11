@@ -15,9 +15,9 @@ import ThankYou from "./ThankYou";
 
 const Ticket = () => {
   const [code, setCode] = useState("");
-  const [isCodeValid, setIsCodeValid] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [booked, setBooked] = useState(false);
+  const [isCodeValid, setIsCodeValid] = useState(true);
+  const [isConfirmed, setIsConfirmed] = useState(true);
+  const [booked, setBooked] = useState(true);
   const [isFree, setIsFree] = useState(false);
   const [showDate, setShowDate] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -47,8 +47,8 @@ const Ticket = () => {
         alert("Please enter a valid code.");
         return;
       }
-      const url = `${import.meta.env.VITE_BACKEND_URL}/validate-code`;
-      console.log(`${import.meta.env.VITE_BACKEND_URL}`);
+      const url = `${import.meta.env.VITE_BACKEND_URL_LIVE}/validate-code`;
+      console.log(`${import.meta.env.VITE_BACKEND_URL_LIVE}`);
       // Make the POST request to the backend API
       setIsConfirmingCode(true);
       const response = await fetch(url, {
@@ -106,7 +106,7 @@ const Ticket = () => {
 
   const handlePayment = async () => {
     const backendUrl = `${
-      import.meta.env.VITE_BACKEND_URL
+      import.meta.env.VITE_BACKEND_URL_LIVE
     }/create-checkout-session`;
 
     let priceId;
@@ -144,7 +144,7 @@ const Ticket = () => {
 
       // Use Stripe.js to redirect to checkout page
       const stripe = await loadStripe(
-        `${import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}`
+        `${import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY_LIVE}`
       );
       const { error } = await stripe.redirectToCheckout({
         sessionId: sessionId,
@@ -179,6 +179,7 @@ const Ticket = () => {
     return date.toLocaleDateString("en-US", options);
   };
   useEffect(() => {
+    console.log(`${import.meta.env.VITE_BACKEND_URL_LIVE}`);
     if (paymentStatus === "true") {
       setIsCodeValid(true);
       setIsConfirmed(true);

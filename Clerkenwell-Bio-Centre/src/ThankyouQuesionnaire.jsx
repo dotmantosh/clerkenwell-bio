@@ -2,21 +2,21 @@ import React from "react";
 import logo from "./assets/CLERKENWELL-removebg-preview.png";
 import Logo from "./Logo";
 
-function ThankYou() {
+function ThankYouQuestionnaire() {
   return (
     <div className="thank-you">
-      <div>
+      {/* <div>
         <img src={logo} className="logo " alt="Vite logo" height="250px" />
-      </div>
+      </div> */}
 
-      <div className="thank-you-wrapper">
-        <p className="mb-4">Thank you for confirming your spot.</p>
+      <div className="thank-you-wrapper thank-you-question-wrapper">
+        <p className="mb-4">Thank you for your submission.</p>
         <p className="mb-4">
-          You will receive further instructions to your email address
-          imminently.
+          Our doctors will now assess your application and email you imminently
+          with their decision.
         </p>
         <p className="mb-4">
-          In the meantime, if you wish to contact us, please email:
+          If you have any immediate enquires, please email:
         </p>
         <p className="fw-bold">angela@clerkenwell-bio-botanics.co.uk</p>
       </div>
@@ -28,4 +28,4 @@ function ThankYou() {
   );
 }
 
-export default ThankYou;
+export default ThankYouQuestionnaire;

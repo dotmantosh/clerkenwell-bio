@@ -11,7 +11,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 dotenv.config();
 admin.initializeApp();
-
+// console.log(process.env);
 const app = express();
 app.use(cors);
 app.use(express.static("public"));
@@ -23,7 +23,8 @@ app.get("/test", (request, response) => {
 
 app.post("/send-email", async (req, res) => {
   try {
-    const { userName, conditionsValues, trialOptionsValues, email } = req.body;
+    const { userName, conditionsValues, trialOptionsValues, email, phone } =
+      req.body;
 
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -45,7 +46,8 @@ app.post("/send-email", async (req, res) => {
         userName,
         conditionsValues,
         trialOptionsValues,
-        email
+        email,
+        phone
       ), // html body
     });
     res.status(200).json({
@@ -143,9 +145,12 @@ app.post("/create-checkout-session", async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       line_items: items,
       mode: "payment",
-      success_url: `http://localhost:5173/payments?userId=${userData.id}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:5173/payments?userId=${userData.id}`,
+      success_url: `https://vegetables-e38f2.web.app/payments?userId=${userData.id}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://vegetables-e38f2.web.app/payments?userId=${userData.id}`,
     });
+    //   success_url: `http://localhost:5173/payments?userId=${userData.id}&session_id={CHECKOUT_SESSION_ID}`,
+    //   cancel_url: `http://localhost:5173/payments?userId=${userData.id}`,
+    // });
 
     res.send(JSON.stringify({ sessionId: session.id }));
   } catch (error) {

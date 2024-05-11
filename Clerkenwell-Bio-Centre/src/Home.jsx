@@ -114,6 +114,7 @@ import React, { useEffect, useState } from "react";
 import Questions from "./Questions";
 import logo from "./assets/CLERKENWELL-removebg-preview.png";
 import "./styles.css"; // Adjust the path as per your project structure
+import Logo from "./Logo";
 
 export default function Home() {
   const [showApply, setShowApply] = useState(false);
@@ -239,9 +240,7 @@ export default function Home() {
 
   return (
     <div className="text-center app-background">
-      <div>
-        <img src={logo} className="logo " alt="Vite logo" height="250px" />
-      </div>
+      <Logo />
 
       <div className="typewriter-container">
         <div className="typewriter-wrapper">
@@ -290,13 +289,24 @@ export default function Home() {
         </div>
         <section className="video-container">
           <section className="video">
-            <iframe
+            {/* <iframe
               src="https://drive.google.com/file/d/1CYW0e5bT0who_oMngUzT8QPJIAnM-rQ8/preview"
-              allow="autoplay"></iframe>
+              allow="autoplay"></iframe> */}
 
             {/* <video
               controls
               src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video> */}
+            <video
+              controls
+              autoPlay
+              playsInline
+              webkitPlaysInline // Use camelCase for webkit attributes
+            >
+              <source
+                src="https://res.cloudinary.com/dkcmv8onk/video/upload/v1715163646/V_Promo_Paul_music_mix_louder_v3_lowres_2_nwwpkq.mp4"
+                type="video/mp4"
+              />
+            </video>
           </section>
         </section>
         <section className="action">{showApply && <Questions />}</section>

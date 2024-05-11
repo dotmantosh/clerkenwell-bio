@@ -2,7 +2,8 @@ const EmailTemplate = (
   userName,
   selectedConditions,
   selectedTrialOptions,
-  email 
+  email,
+  phone
 ) => {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
       <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
@@ -93,9 +94,12 @@ const EmailTemplate = (
             <h1>Congratulations, Admin</h1>
             <p>We're excited to inform you that a new booking has been made on your platform. Here are the details:</p>
             <p><b>Buyer's Name:</b> ${userName}</p>
-            <p><b>Selected Conditions:</b> ${selectedConditions.join(', ')}</p>
-            <p><b>Selected Trial Options:</b> ${selectedTrialOptions.join(', ')}</p>
+            <p><b>Selected Conditions:</b> ${selectedConditions.join(", ")}</p>
+            <p><b>Selected Trial Options:</b> ${selectedTrialOptions.join(
+              ", "
+            )}</p>
             <p><b>Buyer's Email:</b> ${email}</p>
+            <p><b>Buyer's phone:</b> ${phone}</p>
             <br/>
             <p>This notification is to keep you informed about the recent booking on your platform. You may want to review the details for record-keeping purposes or to manage any necessary logistics related to the booking.</p>
             <p>Thank you for choosing us! We hope you have a wonderful experience.</p>

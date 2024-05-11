@@ -6,7 +6,9 @@ const PaymentVerification = () => {
   const navigate = useNavigate();
 
   const fetchPaymentDetails = async (sessionId, userId) => {
-    const backendUrl = `${import.meta.env.VITE_BACKEND_URL}/verify-payment`;
+    const backendUrl = `${
+      import.meta.env.VITE_BACKEND_URL_LIVE
+    }/verify-payment`;
     try {
       const response = await fetch(backendUrl, {
         method: "POST",

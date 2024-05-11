@@ -78,7 +78,7 @@ function CodeGenerate() {
       expiryDateTime,
     };
     // Endpoint to which the POST request will be sent
-    const url = `${import.meta.env.VITE_BACKEND_URL}/register-user`; // Replace with your actual endpoint
+    const url = `${import.meta.env.VITE_BACKEND_URL_LIVE}/register-user`; // Replace with your actual endpoint
 
     // Options for the fetch request
     const options = {
